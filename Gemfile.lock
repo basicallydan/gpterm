@@ -1,5 +1,7 @@
 GEM
+  remote: https://rubygems.org/
   specs:
+    colorize (1.1.0)
     event_stream_parser (1.0.0)
     faraday (2.9.0)
       faraday-net_http (>= 2.0, < 3.2)
@@ -20,7 +22,11 @@ PLATFORMS
   arm64-darwin-22
 
 DEPENDENCIES
-  ruby-openai (< 7.0)
+  colorize
+  ruby-openai (< 7)
+
+RUBY VERSION
+   ruby 3.3.0p0
 
 BUNDLED WITH
    2.4.10

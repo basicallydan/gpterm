@@ -1,4 +1,5 @@
 require 'optparse'
+require 'colorize'
 
 require_relative 'config'
 require_relative 'client'
@@ -14,19 +15,18 @@ class GPTerminal
     prompt = determine_prompt
     message = @client.first_prompt(prompt)
 
-    puts 'Information gathering command:'
-    puts message
-
     if message.downcase == '$$cannot_compute$$'
       puts 'Sorry, I cannot compute a command for this prompt. Try another'
       exit
     end
 
-    if message.downcase == '$$no_gathering_needed$$'
+    output = if message.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'
       output = "No information gathering was needed."
     else
-      puts 'Do you want to continue? The command will be executed (y/n)'
+      puts 'Information gathering command:'
+      puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
+      puts 'Do you want to execute this command? (Y/n)'
       continue = STDIN.gets.chomp
 
       unless continue.downcase == 'y'
@@ -60,10 +60,10 @@ class GPTerminal
 
     message = @client.final_prompt(output)
 
-    puts 'Generated command:'
-    puts message
+    puts 'Generated command to accomplish your goal:'
+    puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
 
-    puts 'Do you want to continue? The command will be executed (y/n)'
+    puts 'Do you want to execute this command? (Y/n)'
 
     continue = STDIN.gets.chomp
 
@@ -90,7 +90,7 @@ class GPTerminal
       new_config['openapi_key'] = STDIN.gets.chomp
 
       print "Your PATH environment variable is: #{ENV['PATH']}"
-      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (y/n) '
+      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '
 
       if STDIN.gets.chomp.downcase == 'y'
         new_config['send_path'] = true
