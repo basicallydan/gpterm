@@ -85,6 +85,7 @@ class GPTerminal
 
       new_config = {}
       print "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}."
+
       print "Enter your OpenAI API key's \"SECRET KEY\" value: "
       new_config['openapi_key'] = STDIN.gets.chomp
 
@@ -108,16 +109,32 @@ class GPTerminal
   def parse_options
     options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: optparse_example.rb [options]"
+      opts.banner = "Usage: gpterminal [preset] [options]"
 
       opts.on("-p", "--prompt PROMPT", "Set a custom prompt") do |v|
         options[:prompt] = v
       end
 
       opts.on("-s", "--save NAME,PROMPT", "Create a custom preset prompt") do |list|
-        # Split the list into two items, keepng in mind that there could be multiple commas but the first
-        # is the only one that matters
         options[:preset_prompt] = list.split(',', 2)
+      end
+
+      opts.on("-h", "--help", "Prints this help") do
+        puts opts
+        exit
+      end
+
+      opts.on("-k", "--key KEY", "Set the OpenAI API key") do |v|
+        AppConfig.add_openapi_key(@config, v)
+        puts "OpenAI API key saved"
+        exit
+      end
+
+      opts.on("-P", "--path", "Send the PATH environment variable to OpenAI") do
+        @config['send_path'] = true
+        AppConfig.save_config(@config)
+        puts "Your PATH environment variable will be sent to OpenAI to help with command generation"
+        exit
       end
     end.parse!
 

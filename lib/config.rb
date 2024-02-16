@@ -21,6 +21,11 @@ module AppConfig
     File.write(CONFIG_FILE, config.to_yaml)
   end
 
+  def self.add_openapi_key(config, openapi_key)
+    config['openapi_key'] = openapi_key
+    save_config(config)
+  end
+
   def self.add_preset(config, preset_name, preset_prompt)
     # This is a YAML file so we need to make sure the presets key exists
     config['presets'] ||= {}

@@ -1,13 +1,13 @@
-# GPTerminal
+# gpterminal
 
-**WARNING:** GPTerminal has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.GPTerminal is a command-line application that allows interaction with OpenAI's GPT models. It's designed for easy use and customization through prompts and presets.
+**WARNING:** `gpterminal` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information. `gpterminal` is a command-line application that allows interaction with OpenAI's GPT models. It's designed for easy use and customization through prompts and presets.
 
 ## Getting Started
 
-To use GPTerminal, ensure you have Ruby installed on your system. Then, follow these steps:
+To use gpterminal, ensure you have Ruby installed on your system. Then, follow these steps:
 
 - Clone the repository or download the source code.
-- Navigate to the GPTerminal directory and run `bundle install` to install dependencies.
+- Navigate to the gpterminal directory and run `bundle install` to install dependencies.
 - Start the application by running `./bin/gpterminal`
 
 ## Configuration
@@ -16,16 +16,16 @@ On first run, you'll be prompted to enter your OpenAI API key. This is required 
 
 ## Usage
 
-GPTerminal can be used with the following options:
+gpterminal can be used with the following options:
 
 - `-p`, `--prompt PROMPT`: Set a custom prompt for generating text.
 - `-s`, `--save NAME,PROMPT`: Create a custom preset prompt that can be reused.
-  Without any options, GPTerminal will prompt you to enter a text prompt manually.
+  Without any options, gpterminal will prompt you to enter a text prompt manually.
 
 ## Presets
 
 You can save and reuse preset prompts for common or repeated tasks. To create a preset, use the `-s` option followed by a name and the prompt, separated by a comma.
-To use a preset, simply pass its name as an argument when starting GPTerminal.
+To use a preset, simply pass its name as an argument when starting gpterminal.
 
 ## Example
 
@@ -47,7 +47,7 @@ Contributions are welcome! Feel free to open an issue or pull request.
 
 ## License
 
-GPTerminal is open-source software licensed under the MIT license.
+gpterminal is open-source software licensed under the MIT license.
 
 ## Author
 
