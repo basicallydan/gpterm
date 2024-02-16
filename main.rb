@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require_relative 'config'
 require_relative 'lib/client'
+require 'optparse'
 
 config = unless File.exist?(AppConfig::CONFIG_FILE)
   puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'
@@ -16,10 +17,23 @@ else
   AppConfig.load_config
 end
 
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: optparse_example.rb [options]"
+
+  opts.on("-p", "--prompt PROMPT", "Set a custom prompt") do |v|
+    options[:prompt] = v
+  end
+end.parse!
+
 client = Client.new(config)
 
-puts 'Enter a prompt to generate text from:'
-prompt = gets.chomp
+if options[:prompt]
+  prompt = options[:prompt]
+else
+  puts 'Enter a prompt to generate text from:'
+  prompt = gets.chomp
+end
 
 puts 'Generating text...'
 
