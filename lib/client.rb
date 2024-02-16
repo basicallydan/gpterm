@@ -7,7 +7,7 @@ class Client
     @openapi_client = OpenAI::Client.new(access_token: config["openapi_key"])
   end
 
-  def first_prompt(prompt, max_tokens: 50, temperature: 0.7, stop: nil)
+  def first_prompt(prompt)
     # Get the user's PATH and put it in a string
     path = ENV["PATH"]
 
@@ -117,7 +117,7 @@ class Client
     content
   end
 
-  def final_prompt(prompt, max_tokens: 50, temperature: 0.7, stop: nil)
+  def final_prompt(prompt)
     full_prompt = <<~PROMPT
       This is the output of the command you provided to the user in the previous step.
 
