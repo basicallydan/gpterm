@@ -1,6 +1,8 @@
 # gpterminal
 
-**WARNING:** `gpterminal` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information. `gpterminal` is a command-line application that allows interaction with OpenAI's GPT models. It's designed for easy use and customization through prompts and presets.
+**WARNING:** `gpterminal` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.
+
+`gpterminal` is a powerful, flexible and dangerous command-line tool designed to help you generate commands for your terminal using OpenAI's Chat Completions. It will not execute commands without your consent, but please do check which commands it is presenting before you let it execute them.
 
 ## Getting Started
 
@@ -53,4 +55,4 @@ gpterminal is open-source software licensed under the MIT license.
 
 ## Author
 
-Dan Hough
+[Dan Hough](https://danhough.com)
