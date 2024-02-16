@@ -2,9 +2,7 @@
 
 **WARNING:** `gpterminal` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.
 
-`gpterminal` is a powerful, flexible and dangerous command-line tool designed to help you generate commands for your terminal using OpenAI's Chat Completions. It will not execute commands without your consent, but please do check which commands it is presenting before you let it execute them.
-
-##
+`gpterminal` is a powerful, flexible and dangerous command-line tool designed to help you generate commands for your terminal using OpenAI's Chat Completions. It will not execute commands without your consent, but please do check which commands it is presenting before you let it execute them. Like so:
 
 ```bash
 $ ./bin/gpterminal -p "Using git diff to gather info, commit all the latest changes with a descriptive commit message, then push the changes"
