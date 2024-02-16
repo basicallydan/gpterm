@@ -107,7 +107,7 @@ class Client
 
     response = openapi_client.chat(
       parameters: {
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4",
         messages: @messages,
         temperature: 0.6,
       }
@@ -150,7 +150,7 @@ class Client
 
     response = openapi_client.chat(
       parameters: {
-        model: "gpt-4-turbo-preview",
+        model: "gpt-4",
         messages: @messages,
         temperature: 0.6,
       }
