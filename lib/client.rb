@@ -40,12 +40,12 @@ class Client
 
       VALID example response. These commands are examples of commands which CAN be included in your FIRST response:
 
+        for file in *; do cat "$file"; done
         which ls
         which git
         which brew
         git diff
         git status
-        for file in *; do cat "$file"; done
 
       INVALID example response. These commands are examples of commands which MUST NOT be included in your FIRST response:
 
@@ -54,6 +54,7 @@ class Client
         git push
 
       If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
+      If you do not need to gather more information, simply return the string "$$no_gathering_needed$$" and the next step will be executed.
 
       The user's goal prompt is:
       "#{prompt}"

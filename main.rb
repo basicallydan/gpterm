@@ -71,19 +71,23 @@ if message.downcase == '$$cannot_compute$$'
   exit
 end
 
-puts 'Do you want to continue? The command will be executed (y/n)'
+if message.downcase == '$$no_gathering_needed$$'
+  puts 'No information gathering needed'
+  output = "No information gathering was needed."
+else
+  puts 'Do you want to continue? The command will be executed (y/n)'
+  continue = STDIN.gets.chomp
 
-continue = STDIN.gets.chomp
+  unless continue.downcase == 'y'
+    exit
+  end
 
-unless continue.downcase == 'y'
-  exit
+  puts 'Running command...'
+  output = `#{message}`
+
+  puts 'Output:'
+  puts output
 end
-
-puts 'Running command...'
-output = `#{message}`
-
-puts 'Output:'
-puts output
 
 puts 'Requesting the next command...'
 
