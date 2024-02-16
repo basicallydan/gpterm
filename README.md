@@ -13,7 +13,9 @@ $  1 file changed, 4 insertions(+)
 
 ## Getting Started
 
-To use gpterminal, ensure you have Ruby installed on your system. Then, follow these steps:
+You can install it from RubyGems using `gem install gpterminal`, or you can clone it and run it straight from the source.
+
+Ensure you have Ruby installed on your system. Then, follow these steps:
 
 - Clone the repository or download the source code.
 - Navigate to the gpterminal directory and run `bundle install` to install dependencies.
