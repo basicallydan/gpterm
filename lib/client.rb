@@ -133,11 +133,12 @@ class Client
       - The response MUST NOT end with a newline character.
       Therefore your NEXT response MUST contain ONLY a list of commands and nothing else.
 
-      Valid example response:
+      VALID example response. These commands are examples of commands which CAN be included in your FINAL response:
 
         ls
         mkdir new_directory
         brew install git
+        git commit -m "This is a great commit message"
 
       If you cannot keep to this restriction, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
     PROMPT
@@ -148,7 +149,7 @@ class Client
       parameters: {
         model: "gpt-4-turbo-preview",
         messages: @messages,
-        temperature: 0.6,
+        temperature: 0.7,
       }
     )
     content = response.dig("choices", 0, "message", "content")
