@@ -130,7 +130,7 @@ class GPTerminal
         exit
       end
 
-      opts.on("-P", "--path", "Send the PATH environment variable to OpenAI") do
+      opts.on("-P", "--send-path", "Send the PATH environment variable to OpenAI") do
         @config['send_path'] = true
         AppConfig.save_config(@config)
         puts "Your PATH environment variable will be sent to OpenAI to help with command generation"

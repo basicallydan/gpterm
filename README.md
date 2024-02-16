@@ -12,7 +12,7 @@ To use gpterminal, ensure you have Ruby installed on your system. Then, follow t
 
 ## Configuration
 
-On first run, you'll be prompted to enter your OpenAI API key. This is required for the application to interact with OpenAI's API.
+On first run, you'll be prompted to enter your OpenAI API key. This is required for the application to interact with OpenAI's API. You will also be asked to specify whether you'd like your `PATH` variable to be sent in the prompt, which can help with command generation.
 
 ## Usage
 
@@ -21,6 +21,8 @@ gpterminal can be used with the following options:
 - `-p`, `--prompt PROMPT`: Set a custom prompt for generating text.
 - `-s`, `--save NAME,PROMPT`: Create a custom preset prompt that can be reused.
   Without any options, gpterminal will prompt you to enter a text prompt manually.
+- `-k`, `--key KEY`: Set the OpenAI API key
+- `-P`, `--send-path`: Send the PATH environment variable to OpenAI.
 
 ## Presets
 
