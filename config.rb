@@ -15,7 +15,17 @@ module AppConfig
   end
 
   def self.save_config(config)
+    puts "Saving config to #{CONFIG_FILE}"
+    puts "It will look like:"
+    puts config.to_yaml
     File.write(CONFIG_FILE, config.to_yaml)
+  end
+
+  def self.add_preset(config, preset_name, preset_prompt)
+    # This is a YAML file so we need to make sure the presets key exists
+    config['presets'] ||= {}
+    config['presets'][preset_name] = preset_prompt
+    save_config(config)
   end
 
   def self.default_config

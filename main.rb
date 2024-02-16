@@ -8,7 +8,7 @@ config = unless File.exist?(AppConfig::CONFIG_FILE)
 
   new_config = {}
   print 'Enter OpenAI API key: '
-  new_config['openapi_key'] = gets.chomp
+  new_config['openapi_key'] = STDIN.gets.chomp
 
   AppConfig.save_config(new_config)
 
@@ -24,19 +24,42 @@ OptionParser.new do |opts|
   opts.on("-p", "--prompt PROMPT", "Set a custom prompt") do |v|
     options[:prompt] = v
   end
+
+  opts.on("-s", "--save NAME,PROMPT", "Create a custom preset prompt") do |list|
+    # Split the list into two items, keepng in mind that there could be multiple commas but the first
+    # is the only one that matters
+    options[:preset_prompt] = list.split(',', 2)
+  end
 end.parse!
 
-client = Client.new(config)
+if options[:preset_prompt]
+  name = options[:preset_prompt][0]
+  prompt = options[:preset_prompt][1]
+  AppConfig.add_preset(config, name, prompt)
+  puts "Preset prompt '#{name}' saved with prompt '#{prompt}'"
+  exit
+end
 
-if options[:prompt]
+if ARGV.length == 1
+  # collect a prompt from the preset prompts
+  prompt = config['presets'][ARGV[0]]
+
+  unless prompt
+    puts "Preset prompt not found: #{ARGV[0]}"
+    exit
+  end
+
+  puts "Using preset prompt '#{prompt}'"
+elsif options[:prompt]
   prompt = options[:prompt]
 else
   puts 'Enter a prompt to generate text from:'
-  prompt = gets.chomp
+  prompt = STDIN.gets.chomp
 end
 
 puts 'Generating text...'
 
+client = Client.new(config)
 message = client.first_prompt(prompt)
 
 # Check if the user wants to continue
@@ -50,7 +73,7 @@ end
 
 puts 'Do you want to continue? The command will be executed (y/n)'
 
-continue = gets.chomp
+continue = STDIN.gets.chomp
 
 unless continue.downcase == 'y'
   exit
@@ -71,7 +94,7 @@ puts message
 
 puts 'Do you want to continue? The command will be executed (y/n)'
 
-continue = gets.chomp
+continue = STDIN.gets.chomp
 
 unless continue.downcase == 'y'
   exit

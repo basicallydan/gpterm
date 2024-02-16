@@ -29,6 +29,8 @@ class Client
       - The commands MUST NOT send any data to any external servers.
       - The commands MUST NOT contain any placeholders in angle brackets like <this>.
       - The commands MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
+      - The commands MAY gather information about the user's system, such as the version of a software package, or the contents of a file.
+      - The commands SHOULD tend to gather more verbose information INSTEAD OF more concise information.
       This will help you to provide a more accurate response to the user's goal.
       Therefore your FIRST response MUST contain ONLY a list of commands and nothing else.
 
@@ -61,7 +63,7 @@ class Client
       parameters: {
         model: "gpt-3.5-turbo",
         messages: @messages,
-        temperature: 0.5,
+        temperature: 0.6,
       }
     )
     content = response.dig("choices", 0, "message", "content")
@@ -98,7 +100,7 @@ class Client
       parameters: {
         model: "gpt-4-turbo-preview",
         messages: @messages,
-        temperature: 0.7,
+        temperature: 0.6,
       }
     )
     content = response.dig("choices", 0, "message", "content")
