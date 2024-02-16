@@ -6,6 +6,30 @@
 
 ```bash
 $ ./bin/gpterminal -p "Using git diff to gather info, commit all the latest changes with a descriptive commit message, then push the changes"
+$ Information gathering command:
+$ which git
+$ git diff
+$ Do you want to continue? The command will be executed (y/n)
+$ y
+$ Running command...
+$ Output:
+$ /usr/bin/git
+$ diff --git a/README.md b/README.md
+$ index 3fbb7a6..ca42f20 100644
+$ --- a/README.md
+$ +++ b/README.md
+$ @@ -4,6 +4,10 @@
+$ # etc.
+$ Requesting the next command...
+$ Generated command:
+$ git add .
+$ git commit -m "Update README with gpterminal usage example"
+$ git push
+$ Do you want to continue? The command will be executed (y/n)
+$ y
+$ # etc.
+$ [main 94a9292] Update README with gpterminal usage example
+$  1 file changed, 4 insertions(+)
 ```
 
 ## Getting Started
