@@ -38,20 +38,6 @@ gpterminal can be used with the following options:
 You can save and reuse preset prompts for common or repeated tasks. To create a preset, use the `-s` option followed by a name and the prompt, separated by a comma.
 To use a preset, simply pass its name as an argument when starting gpterminal.
 
-## Example
-
-```
-$ ruby main.rb -p 'Tell me a joke'
-```
-
-This command uses a custom prompt to generate a joke.
-
-```
-$ ruby main.rb funny_joke
-```
-
-This command uses a preset named 'funny_joke' to generate a joke.
-
 ## Contributing
 
 Contributions are welcome! Feel free to open an issue or pull request.

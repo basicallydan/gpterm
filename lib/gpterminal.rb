@@ -20,7 +20,7 @@ class GPTerminal
       exit
     end
 
-    output = if message.downcase == '$$no_gathering_needed$$'
+    if message.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'.colorize(:magenta)
       output = "No information gathering was needed."
     else

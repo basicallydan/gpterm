@@ -64,6 +64,7 @@ class Client
 
       If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
       If you do not need to gather more information, simply return the string "$$no_gathering_needed$$" and the next step will be executed.
+      You probably will need to gather information.
       If you need to gather information directly from the user, you will be able to do so in the next step.
 
       The user's goal prompt is:
