@@ -1,5 +1,6 @@
 # GPTerminal
-GPTerminal is a command-line application that allows interaction with OpenAI's GPT models. It's designed for easy use and customization through prompts and presets.
+
+**WARNING:** GPTerminal has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.GPTerminal is a command-line application that allows interaction with OpenAI's GPT models. It's designed for easy use and customization through prompts and presets.
 ## Getting Started
 To use GPTerminal, ensure you have Ruby installed on your system. Then, follow these steps:
 - Clone the repository or download the source code.
