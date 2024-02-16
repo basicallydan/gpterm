@@ -84,8 +84,18 @@ class GPTerminal
       puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'
 
       new_config = {}
-      print 'Enter OpenAI API key: '
+      print "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}."
+      print "Enter your OpenAI API key's \"SECRET KEY\" value: "
       new_config['openapi_key'] = STDIN.gets.chomp
+
+      print "Your PATH environment variable is: #{ENV['PATH']}"
+      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (y/n) '
+
+      if STDIN.gets.chomp.downcase == 'y'
+        new_config['send_path'] = true
+      else
+        new_config['send_path'] = false
+      end
 
       AppConfig.save_config(new_config)
 

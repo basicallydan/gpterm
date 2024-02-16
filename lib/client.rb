@@ -2,15 +2,14 @@ require "openai"
 
 class Client
   attr_reader :openapi_client
+  attr_reader :config
 
   def initialize(config)
+    @config = config
     @openapi_client = OpenAI::Client.new(access_token: config["openapi_key"])
   end
 
   def first_prompt(prompt)
-    # Get the user's PATH and put it in a string
-    path = ENV["PATH"]
-
     system_prompt = <<~PROMPT
       You are a command-line application being executed inside of a directory in a macOS environment, on the user's terminal command line.
 
@@ -23,10 +22,14 @@ class Client
       You have the ability to run any command that this system can run, and you can read the output of those commands.
 
       The user is trying to accomplish a task using the terminal, but they are not sure how to do it.
-
-      The user's PATH is:
-      #{path}
     PROMPT
+
+    if @config["send_path"]
+      system_prompt += <<~PROMPT
+        The user's PATH environment variable is:
+        #{ENV["PATH"]}
+      PROMPT
+    end
 
     full_prompt = <<~PROMPT
       Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system.
