@@ -29,3 +29,6 @@ This command uses a preset named 'funny_joke' to generate a joke.
 Contributions are welcome! Feel free to open an issue or pull request.
 ## License
 GPTerminal is open-source software licensed under the MIT license.
+
+## Author
+Dan Hough

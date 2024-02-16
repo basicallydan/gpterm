@@ -55,6 +55,7 @@ class Client
 
       If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
       If you do not need to gather more information, simply return the string "$$no_gathering_needed$$" and the next step will be executed.
+      If you need to gather information directly from the user, you will be able to do so in the next step.
 
       The user's goal prompt is:
       "#{prompt}"
@@ -80,7 +81,37 @@ class Client
     content
   end
 
-  def second_prompt(prompt, max_tokens: 50, temperature: 0.7, stop: nil)
+  def offer_information_prompt(prompt)
+    full_prompt = <<~PROMPT
+      This is the output of the command you provided to the user in the previous step.
+
+      #{prompt}
+
+      Before you provide the user with the next command, you have the opportunity to ask the user to provide more information so you can better tailor your response to their needs.
+
+      If you would like to ask the user for more information, please provide a prompt that asks the user for the information you need.
+      - Your prompt MUST ONLY contain one question. You will be able to ask another question in the next step.
+      If you have all the information you need, simply return the string "$$no_more_information_needed$$" and the next step will be executed.
+    PROMPT
+
+    @messages << { role: "user", content: full_prompt }
+
+    response = openapi_client.chat(
+      parameters: {
+        model: "gpt-4-turbo-preview",
+        messages: @messages,
+        temperature: 0.6,
+      }
+    )
+
+    content = response.dig("choices", 0, "message", "content")
+
+    @messages << { role: "assistant", content: content }
+
+    content
+  end
+
+  def final_prompt(prompt, max_tokens: 50, temperature: 0.7, stop: nil)
     full_prompt = <<~PROMPT
       This is the output of the command you provided to the user in the previous step.
 
