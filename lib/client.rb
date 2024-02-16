@@ -25,17 +25,28 @@ class Client
     full_prompt = <<~PROMPT
       Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system.
       - The commands MUST NOT make any changes to the user's system.
+      - The commands MUST NOT make any changes to any files on the user's system.
+      - The commands MUST NOT send any data to any external servers.
       - The commands MUST NOT contain any placeholders in angle brackets like <this>.
       - The commands MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
-      - The commands MUST all start with `which` to find out if a command is installed.
       This will help you to provide a more accurate response to the user's goal.
-      Therefore your FIRST response MUST contain ONLY a list of commands and nothing else. Example response:
+      Therefore your FIRST response MUST contain ONLY a list of commands and nothing else.
 
-      which ls
-      which git
-      which brew
+      VALID example response. These commands are examples of commands which CAN be included in your FIRST response:
 
-      If you cannot keep to this restriction, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
+        which ls
+        which git
+        which brew
+        git diff
+        git status
+
+      INVALID example response. These commands are examples of commands which MUST NOT be included in your FIRST response:
+
+        touch file.txt
+        git add .
+        git push
+
+      If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
 
       The user's goal is:
       #{prompt}
@@ -50,7 +61,7 @@ class Client
       parameters: {
         model: "gpt-3.5-turbo",
         messages: @messages,
-        temperature: 0.7,
+        temperature: 0.5,
       }
     )
     content = response.dig("choices", 0, "message", "content")
