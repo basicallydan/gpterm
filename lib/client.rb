@@ -152,7 +152,7 @@ class Client
       parameters: {
         model: "gpt-4-turbo-preview",
         messages: @messages,
-        temperature: 0.7,
+        temperature: 0.6,
       }
     )
     content = response.dig("choices", 0, "message", "content")

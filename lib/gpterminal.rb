@@ -16,17 +16,17 @@ class GPTerminal
     message = @client.first_prompt(prompt)
 
     if message.downcase == '$$cannot_compute$$'
-      puts 'Sorry, I cannot compute a command for this prompt. Try another'
+      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
       exit
     end
 
     output = if message.downcase == '$$no_gathering_needed$$'
-      puts 'No information gathering needed'
+      puts 'No information gathering needed'.colorize(:magenta)
       output = "No information gathering was needed."
     else
-      puts 'Information gathering command:'
-      puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
-      puts 'Do you want to execute this command? (Y/n)'
+      puts 'Information gathering command:'.colorize(:magenta)
+      puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
+      puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
       continue = STDIN.gets.chomp
 
       unless continue.downcase == 'y'
@@ -43,9 +43,9 @@ class GPTerminal
     output = offer_more_information(output)
 
     while output.downcase != '$$no_more_information_needed$$'
-      puts "You have been asked to provide more information with this command:"
-      puts output
-      puts "What is your response? (Type 'skip' to skip this step and force the final command to be generated)"
+      puts "You have been asked to provide more information with this command:".colorize(:magenta)
+      puts output.gsub(/^/, "#{"  >".colorize(:blue)} ")
+      puts "What is your response? (Type 'skip' to skip this step and force the final command to be generated)".colorize(:yellow)
 
       response = STDIN.gets.chomp
 
@@ -56,14 +56,14 @@ class GPTerminal
       end
     end
 
-    puts 'Requesting the next command...'
+    puts 'Requesting the next command...'.colorize(:magenta)
 
     message = @client.final_prompt(output)
 
-    puts 'Generated command to accomplish your goal:'
+    puts 'Generated command to accomplish your goal:'.colorize(:magenta)
     puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
 
-    puts 'Do you want to execute this command? (Y/n)'
+    puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
 
     continue = STDIN.gets.chomp
 
@@ -81,16 +81,16 @@ class GPTerminal
 
   def load_config
     unless File.exist?(AppConfig::CONFIG_FILE)
-      puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'
+      puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'.colorize(:magenta)
 
       new_config = {}
-      print "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}."
+      print "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
 
-      print "Enter your OpenAI API key's \"SECRET KEY\" value: "
+      print "Enter your OpenAI API key's \"SECRET KEY\" value: ".colorize(:yellow)
       new_config['openapi_key'] = STDIN.gets.chomp
 
-      print "Your PATH environment variable is: #{ENV['PATH']}"
-      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '
+      print "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
+      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '.colorize(:yellow)
 
       if STDIN.gets.chomp.downcase == 'y'
         new_config['send_path'] = true
@@ -146,7 +146,7 @@ class GPTerminal
       name = @options[:preset_prompt][0]
       prompt = @options[:preset_prompt][1]
       AppConfig.add_preset(@config, name, prompt)
-      puts "Preset prompt '#{name}' saved with prompt '#{prompt}'"
+      puts "Preset prompt '#{name}' saved with prompt '#{prompt}'".colorize(:green)
       exit
     end
 
@@ -155,15 +155,15 @@ class GPTerminal
       prompt = @config['presets'][ARGV[0]]
 
       unless prompt
-        puts "Preset prompt not found: #{ARGV[0]}"
+        puts "Preset prompt not found: #{ARGV[0]}".colorize(:red)
         exit
       end
 
-      puts "Using preset prompt '#{prompt}'"
+      puts "Using preset prompt '#{prompt}'".colorize(:magenta)
     elsif @options[:prompt]
       prompt = @options[:prompt]
     else
-      puts 'Enter a prompt to generate text from:'
+      puts 'Enter a prompt to generate text from:'.colorize(:yellow)
       prompt = STDIN.gets.chomp
     end
 
