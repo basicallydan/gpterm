@@ -12,24 +12,28 @@ class Client
     path = ENV["PATH"]
 
     system_prompt = <<~PROMPT
-      You are an expert in writing commands for the macOS terminal.
+      You are a command-line application being executed inside of a directory in a macOS environment, on the user's terminal command line.
+
+      You have the ability to run any command that this system can run, and you can read the output of those commands.
 
       The user is trying to accomplish a task using the terminal, but they are not sure how to do it.
 
       The user's PATH is:
       #{path}
-      The user will provide a goal, and your role is to provide the command that the user should run in the terminal to accomplish that goal.
-
     PROMPT
 
     full_prompt = <<~PROMPT
       Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system.
       - The commands MUST NOT make any changes to the user's system.
       - The commands MUST NOT make any changes to any files on the user's system.
+      - The commands MUST NOT write to any files using the > or >> operators.
+      - The commands MUST NOT use the touch command.
+      - The commands MUST NOT use echo or any other command to write into files using the > or >> operators.
       - The commands MUST NOT send any data to any external servers.
       - The commands MUST NOT contain any placeholders in angle brackets like <this>.
       - The commands MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
       - The commands MAY gather information about the user's system, such as the version of a software package, or the contents of a file.
+      - The commands CAN pipe their output into other commands.
       - The commands SHOULD tend to gather more verbose information INSTEAD OF more concise information.
       This will help you to provide a more accurate response to the user's goal.
       Therefore your FIRST response MUST contain ONLY a list of commands and nothing else.
@@ -50,8 +54,9 @@ class Client
 
       If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
 
-      The user's goal is:
-      #{prompt}
+      The user's goal prompt is:
+      "#{prompt}"
+      Commands to execute to gather more information about the user's system before providing the response which will accomplish the user's goal:
     PROMPT
 
     @messages = [
