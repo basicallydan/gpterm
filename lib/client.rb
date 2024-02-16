@@ -45,6 +45,7 @@ class Client
         which brew
         git diff
         git status
+        for file in *; do cat "$file"; done
 
       INVALID example response. These commands are examples of commands which MUST NOT be included in your FIRST response:
 
@@ -90,11 +91,13 @@ class Client
       - The commands MUST all start with a valid command that you would run in the terminal
       - The commands MUST NOT contain any placeholders in angle brackets like <this>.
       - The response MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
-      Therefore your NEXT response MUST contain ONLY a list of commands and nothing else. Example response:
+      Therefore your NEXT response MUST contain ONLY a list of commands and nothing else.
 
-      ls
-      mkdir new_directory
-      brew install git
+      Valid example response:
+
+        ls
+        mkdir new_directory
+        brew install git
 
       If you cannot keep to this restriction, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
     PROMPT
