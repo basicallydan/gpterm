@@ -172,7 +172,7 @@ class GPTerminal
     elsif command == 'help'
       puts main
       exit
-    elsif command.present?
+    elsif command
       options[:prompt] = command
     else
       puts 'Enter a prompt to generate text from:'.colorize(:yellow)
