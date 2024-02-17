@@ -15,9 +15,6 @@ module AppConfig
   end
 
   def self.save_config(config)
-    puts "Saving config to #{CONFIG_FILE}"
-    puts "It will look like:"
-    puts config.to_yaml
     File.write(CONFIG_FILE, config.to_yaml)
   end
 

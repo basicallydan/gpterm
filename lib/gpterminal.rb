@@ -12,7 +12,20 @@ class GPTerminal
   end
 
   def run
-    prompt = determine_prompt
+    if @options[:preset_prompt]
+      name = @options[:preset_prompt][0]
+      prompt = @options[:preset_prompt][1]
+      AppConfig.add_preset(@config, name, prompt)
+      puts "Preset prompt '#{name}' saved with prompt '#{prompt}'".colorize(:green)
+      exit
+    elsif @options[:prompt]
+      start_prompt(@options[:prompt])
+    end
+  end
+
+  private
+
+  def start_prompt(prompt)
     message = @client.first_prompt(prompt)
 
     if message.downcase == '$$cannot_compute$$'
@@ -77,20 +90,18 @@ class GPTerminal
     puts output
   end
 
-  private
-
   def load_config
     unless File.exist?(AppConfig::CONFIG_FILE)
       puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'.colorize(:magenta)
 
       new_config = {}
-      print "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
+      puts "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
 
-      print "Enter your OpenAI API key's \"SECRET KEY\" value: ".colorize(:yellow)
+      puts "Enter your OpenAI API key's \"SECRET KEY\" value: ".colorize(:yellow)
       new_config['openapi_key'] = STDIN.gets.chomp
 
-      print "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
-      print 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '.colorize(:yellow)
+      puts "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
+      puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '.colorize(:yellow)
 
       if STDIN.gets.chomp.downcase == 'y'
         new_config['send_path'] = true
@@ -108,66 +119,67 @@ class GPTerminal
 
   def parse_options
     options = {}
-    OptionParser.new do |opts|
-      opts.banner = "Usage: gpterminal [preset] [options]"
+    subcommands = {
+      'preset' => {
+        option_parser: OptionParser.new do |opts|
+          opts.banner = "gpterminal preset <name> <prompt>"
+        end,
+        argument_parser: ->(args) {
+          if args.length < 2
+            options[:prompt] = @config['presets'][args[0]]
+          else
+            options[:preset_prompt] = [args[0], args[1]]
+          end
+        }
+      },
+      'config' => {
+        option_parser: OptionParser.new do |opts|
+          opts.banner = "gpterminal config [--openapi_key <value>|--send_path <true|false>]"
+          opts.on("--openapi_key VALUE", "Set the OpenAI API key") do |v|
+            AppConfig.add_openapi_key(@config, v)
+            puts "OpenAI API key saved"
+            exit
+          end
+          opts.on("--send_path", "Send the PATH environment variable to OpenAI") do
+            @config['send_path'] = true
+            AppConfig.save_config(@config)
+            puts "Your PATH environment variable will be sent to OpenAI to help with command generation"
+            exit
+          end
+        end
+      }
+    }
 
-      opts.on("-p", "--prompt PROMPT", "Set a custom prompt") do |v|
-        options[:prompt] = v
+    main = OptionParser.new do |opts|
+      opts.banner = "Usage:"
+      opts.banner += "\n\ngpterminal <prompt> [options] [subcommand [options]]"
+      opts.banner += "\n\nSubcommands:"
+      subcommands.each do |name, subcommand|
+        opts.banner += "\n  #{name} - #{subcommand[:option_parser].banner}"
       end
-
-      opts.on("-s", "--save NAME,PROMPT", "Create a custom preset prompt") do |list|
-        options[:preset_prompt] = list.split(',', 2)
+      opts.banner += "\n\nOptions:"
+      opts.on("-v", "--verbose", "Run verbosely") do |v|
+        options[:verbose] = true
       end
-
-      opts.on("-h", "--help", "Prints this help") do
-        puts opts
-        exit
-      end
-
-      opts.on("-k", "--key KEY", "Set the OpenAI API key") do |v|
-        AppConfig.add_openapi_key(@config, v)
-        puts "OpenAI API key saved"
-        exit
-      end
-
-      opts.on("-P", "--send-path", "Send the PATH environment variable to OpenAI") do
-        @config['send_path'] = true
-        AppConfig.save_config(@config)
-        puts "Your PATH environment variable will be sent to OpenAI to help with command generation"
-        exit
-      end
-    end.parse!
-
-    options
-  end
-
-  def determine_prompt
-    if @options[:preset_prompt]
-      name = @options[:preset_prompt][0]
-      prompt = @options[:preset_prompt][1]
-      AppConfig.add_preset(@config, name, prompt)
-      puts "Preset prompt '#{name}' saved with prompt '#{prompt}'".colorize(:green)
-      exit
     end
 
-    if ARGV.length == 1
-      # collect a prompt from the preset prompts
-      prompt = @config['presets'][ARGV[0]]
+    command = ARGV.shift
 
-      unless prompt
-        puts "Preset prompt not found: #{ARGV[0]}".colorize(:red)
-        exit
-      end
-
-      puts "Using preset prompt '#{prompt}'".colorize(:magenta)
-    elsif @options[:prompt]
-      prompt = @options[:prompt]
+    main.order!
+    if subcommands.key?(command)
+      subcommands[command][:option_parser].parse!
+      subcommands[command][:argument_parser].call(ARGV) if subcommands[command][:argument_parser]
+    elsif command == 'help'
+      puts main
+      exit
+    elsif command.present?
+      options[:prompt] = command
     else
       puts 'Enter a prompt to generate text from:'.colorize(:yellow)
-      prompt = STDIN.gets.chomp
+      options[:prompt] = STDIN.gets.chomp
     end
 
-    prompt
+    options
   end
 
   def offer_more_information(output)
