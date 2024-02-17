@@ -1,3 +1,11 @@
+# 0.2.0
+
+- Changed the interface to use a mixture of positional args, subcommands and options
+
+# 0.1.1
+
+- Switch to using gpt-4-turbo-preview
+
 # 0.1.0
 
 - First release
