@@ -1,5 +1,7 @@
 /.ruby-lsp
 /gpterminal-*.*
 /gpterminal.gemspec
+/gpterm-*.*
+/gpterm.gemspec
 /.git
 /Gemfile.lock

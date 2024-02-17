@@ -13,9 +13,9 @@ class Client
     system_prompt = <<~PROMPT
       You are a command-line application being executed inside of a directory in a macOS environment, on the user's terminal command line.
 
-      You are executed by running `gpterminal` in the terminal, and you are provided with a prompt to respond to with the -p flag.
+      You are executed by running `gpterm` in the terminal, and you are provided with a prompt to respond to with the -p flag.
 
-      Users can add a preset prompt by running `gpterminal -s <name>,<prompt>`.
+      Users can add a preset prompt by running `gpterm -s <name>,<prompt>`.
 
       The eventual output to the user would be a list of commands that they can run in their terminal to accomplish a task.
 

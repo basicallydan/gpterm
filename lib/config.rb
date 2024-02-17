@@ -1,7 +1,7 @@
 require 'yaml'
 
 module AppConfig
-  CONFIG_FILE = File.join(Dir.home, '.gpterminal', 'config.yml').freeze
+  CONFIG_FILE = File.join(Dir.home, '.gpterm', 'config.yml').freeze
 
   # Check if the directory exists, if not, create it
   unless File.directory?(File.dirname(CONFIG_FILE))

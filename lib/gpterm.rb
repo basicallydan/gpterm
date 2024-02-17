@@ -4,7 +4,7 @@ require 'colorize'
 require_relative 'config'
 require_relative 'client'
 
-class GPTerminal
+class GPTerm
   def initialize
     @config = load_config
     @options = parse_options
@@ -92,7 +92,7 @@ class GPTerminal
 
   def load_config
     unless File.exist?(AppConfig::CONFIG_FILE)
-      puts 'Welcome to GPTerminal! It looks like this is your first time using this application.'.colorize(:magenta)
+      puts 'Welcome to gpterm! It looks like this is your first time using this application.'.colorize(:magenta)
 
       new_config = {}
       puts "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
@@ -122,7 +122,7 @@ class GPTerminal
     subcommands = {
       'preset' => {
         option_parser: OptionParser.new do |opts|
-          opts.banner = "gpterminal preset <name> <prompt>"
+          opts.banner = "gpterm preset <name> <prompt>"
         end,
         argument_parser: ->(args) {
           if args.length < 2
@@ -134,7 +134,7 @@ class GPTerminal
       },
       'config' => {
         option_parser: OptionParser.new do |opts|
-          opts.banner = "gpterminal config [--openapi_key <value>|--send_path <true|false>]"
+          opts.banner = "gpterm config [--openapi_key <value>|--send_path <true|false>]"
           opts.on("--openapi_key VALUE", "Set the OpenAI API key") do |v|
             AppConfig.add_openapi_key(@config, v)
             puts "OpenAI API key saved"
@@ -152,7 +152,7 @@ class GPTerminal
 
     main = OptionParser.new do |opts|
       opts.banner = "Usage:"
-      opts.banner += "\n\ngpterminal <prompt> [options] [subcommand [options]]"
+      opts.banner += "\n\ngpterm <prompt> [options] [subcommand [options]]"
       opts.banner += "\n\nSubcommands:"
       subcommands.each do |name, subcommand|
         opts.banner += "\n  #{name} - #{subcommand[:option_parser].banner}"
