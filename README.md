@@ -44,6 +44,15 @@ On first run, you'll be prompted to enter your OpenAI API key. This is required 
 You can save and reuse preset prompts for common or repeated tasks. To create a preset, use the `-s` option followed by a name and the prompt, separated by a comma.
 To use a preset, simply pass its name as an argument when starting gpterm.
 
+### Example Presets
+
+I have been using the following presets while developing `gpterm` and have found them to be quite helpful.
+
+- `gc`: **Makes and pushes a commit describing the most recent changes.**
+  - Prompt: `"Commit all the latest changes to main, describing specifically what the changes are in the commit message. Please determine what the changes are before you write the commit message. You should use git diff and git status for information gathering"`
+- `minorv`: **Does all the steps necessary in publishing a new version of this gem, including updating the changelog.**
+  - Prompt: `"Bump to a new minor version of this gem (change the y and reset z in version number x.y.z). That means you need to add a new section to the changelog with 1-5 bullet points summarising the changes (check git logs since the most recent git tag), then commit that, then create a new git tag, pushing the tag to the remote, update the gemspec, build the gem and publish it to rubygems. DO NOT try to add or commit any .gemspec files to the repo, or any other files which are listed in .gitignore"`
+
 ## Contributing
 
 Contributions are welcome! Feel free to open an issue or pull request.
