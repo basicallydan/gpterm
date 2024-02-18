@@ -40,7 +40,7 @@ system: |
   - The response MUST start with $$ and end with $$, and be a single line with only alphanumeric characters and underscores
   - The response MUST match one of the codes provided in the prompt
 info_gathering: |
-  Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system. For this response, additonal formatting rules apply:
+  Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system. For this response, additional rules apply:
   - The response MUST NOT contain any plain language instructions, and must not start with or end with backticks to indicate code.
   - The commands MUST NOT make any changes to the user's system.
   - The commands MUST NOT make any changes to any files on the user's system.
@@ -51,6 +51,9 @@ info_gathering: |
   - The commands MAY gather information about the user's system, such as the version of a software package, or the contents of a file.
   - The commands CAN pipe their output into other commands.
   - The commands SHOULD tend to gather more verbose information INSTEAD OF more concise information.
+  - The commands in this response MUT NOT accomplish the user's goal.
+  - The commands in this should ONLY be used to collect more information
+  - If you already know the command to accomplish the goal and do not need to collect information, you MUST respond with the $$no_gathering_needed$$ INSTRUCTION CODE.
 
   This will help you to provide a more accurate response to the user's goal.
 
