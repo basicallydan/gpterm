@@ -61,6 +61,10 @@ Contributions are welcome! Feel free to open an issue or pull request.
 
 gpterm is open-source software licensed under the MIT license.
 
-## Author
+## Credit
 
-[Dan Hough](https://danhough.com)
+[Dan Hough](https://danhough.com)/@basicallydan built this application.
+
+[Alex Rudall](https://github.com/alexrudall)/@alexrudall developed [ruby-openai](https://github.com/alexrudall/ruby-openai) around which this application was built.
+
+[OpenAI](https://openai.com/)/@openai built a powerful API full of great AI models upon which this whole concept relies.
