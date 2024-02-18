@@ -20,6 +20,8 @@ system: |
   - The response MUST keep in mind that each line of the response will be executed in the shell in a subshell, and the output of each command will be captured
   - The commands MUST NOT contain any placeholders which the user is expected to replace with their own values
   - If a command needs to be run in another directory, the command to change directory MUST be part of that command. To execute a command in a different directory, you must chain the cd command with the command you want to run, like so: `cd /path/to/directory && command`. You will need to do the same for any command that requires a different working directory, even if you have used cd in a previous command
+  - The commands MUST NOT involve any multi-line strings, heredocs, loops, conditionals or anything which necessitates running multiple lines in a single command. So no << EOF or anything like that
+  - Each command MUST BE executable on a single line in the shell
 
   When responding with an INSTRUCTION CODE indicating that no commands can be generated or are necessary:
   - The response MUST start with $$ and end with $$, and be a single line with only alphanumeric characters and underscores
