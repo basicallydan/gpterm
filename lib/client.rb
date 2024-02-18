@@ -11,7 +11,7 @@ class Client
     @prompts = YAML.load_file('config/prompts.yml')
   end
 
-  def first_prompt(goal_prompt)
+  def first_prompt(user_goal_prompt)
     system_prompt = @prompts["system"]
 
     if @config["send_path"]
@@ -27,7 +27,7 @@ class Client
     user_prompt += <<~PROMPT
       The user's GOAL PROMPT is:
 
-      "#{goal_prompt}"
+      "#{user_goal_prompt}"
 
       Please respond with one or more commands to execute to gather more information about the user's system before providing the response which will accomplish the user's goal.
 
@@ -35,22 +35,10 @@ class Client
     PROMPT
 
     @messages = [
-      { role: "system", content: system_prompt },
-      { role: "user", content: user_prompt }
+      { role: "system", content: system_prompt }
     ]
 
-    response = openapi_client.chat(
-      parameters: {
-        model: "gpt-4-turbo-preview",
-        messages: @messages,
-        temperature: 0.6,
-      }
-    )
-    content = response.dig("choices", 0, "message", "content")
-
-    @messages << { role: "assistant", content: content }
-
-    content
+    continue_conversation(user_prompt)
   end
 
   def offer_information_prompt(previous_output, previous_output_type = :question_response)
@@ -70,34 +58,26 @@ class Client
 
     question_prompt += @prompts["user_question"]
 
-    @messages << { role: "user", content: question_prompt }
-
-    response = openapi_client.chat(
-      parameters: {
-        model: "gpt-4-turbo-preview",
-        messages: @messages,
-        temperature: 0.6,
-      }
-    )
-
-    content = response.dig("choices", 0, "message", "content")
-
-    @messages << { role: "assistant", content: content }
-
-    content
+    continue_conversation(question_prompt)
   end
 
   def final_prompt(prompt)
-    full_prompt = <<~PROMPT
+    goal_commands_prompt = <<~PROMPT
       This is the output of the command you provided to the user in the previous step.
 
       #{prompt}
 
     PROMPT
 
-    full_prompt += @prompts["goal_commands"]
+    goal_commands_prompt += @prompts["goal_commands"]
 
-    @messages << { role: "user", content: full_prompt }
+    continue_conversation(goal_commands_prompt)
+  end
+
+  private
+
+  def continue_conversation(prompt)
+    @messages << { role: "user", content: prompt }
 
     response = openapi_client.chat(
       parameters: {
