@@ -5,6 +5,13 @@ require 'open3'
 require_relative 'config'
 require_relative 'client'
 
+# The colours work like this:
+# - Output from STDOUT or STDERR is default
+# - For the final command, if STDERR is there and the exit code is non-zero, it's red
+# - Statements from this app are magenta
+# - Questions from this app are yellow
+# - Messages from the OpenAI API are blue
+
 class GPTerm
   def initialize
     @config = load_config
@@ -98,11 +105,14 @@ class GPTerm
       stdout, stderr, exit_status = execute_command(command)
       if exit_status != 0
         puts "#{command} failed with the following output:".colorize(:red)
+        puts "#{stderr.gsub(/^/, "  ")}".colorize(:red) if stderr.length > 0
         puts "  Exit status: #{exit_status}".colorize(:red)
         exit
       end
-      puts stdout.colorize(:green) if stdout.length > 0
-      puts "#{stderr.gsub(/^/, "  ")}".colorize(:red) if stderr.length > 0
+      puts stdout if stdout.length > 0
+      # I'm doing this here because git for some reason always returns the output of a push to stderr,
+      # even if it's successful. I don't want to show the output of a successful push as an error.
+      puts stderr if stderr.length > 0
     end
   end
 
