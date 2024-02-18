@@ -35,6 +35,7 @@ class Client
 
     full_prompt = <<~PROMPT
       Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system.
+      - The response MUST NOT contain any plain language instructions, and must not start with or end with backticks to indicate code.
       - The commands MUST NOT make any changes to the user's system.
       - The commands MUST NOT make any changes to any files on the user's system.
       - The commands MUST NOT write to any files using the > or >> operators.
@@ -42,7 +43,6 @@ class Client
       - The commands MUST NOT use echo or any other command to write into files using the > or >> operators.
       - The commands MUST NOT send any data to any external servers.
       - The commands MUST NOT contain any placeholders in angle brackets like <this>.
-      - The commands MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
       - The commands MAY gather information about the user's system, such as the version of a software package, or the contents of a file.
       - The commands CAN pipe their output into other commands.
       - The commands SHOULD tend to gather more verbose information INSTEAD OF more concise information.
