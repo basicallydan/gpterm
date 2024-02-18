@@ -1,3 +1,7 @@
+# 0.6.0
+
+- Allow the model to be configured
+
 # 0.5.0
 
 - Updated user prompts for clarity in gpterm.rb by adding 'then hit return' to all user input instructions.
@@ -5,6 +9,7 @@
 - Refactor gpterm.rb: streamline command execution and improve exit message handling.
 - Refactor Client class: rename openapi_client to openai_client and update method calls accordingly.
 - DRY the interactions with openai client
+
 # 0.2.0
 
 - Changed the interface to use a mixture of positional args, subcommands and options
