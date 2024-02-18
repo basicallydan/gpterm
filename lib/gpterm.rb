@@ -24,34 +24,41 @@ class GPTerm
       name = @options[:preset_prompt][0]
       prompt = @options[:preset_prompt][1]
       AppConfig.add_preset(@config, name, prompt)
-      puts "Preset prompt '#{name}' saved with prompt '#{prompt}'".colorize(:green)
-      exit
+      exit_with_message("Preset prompt '#{name}' saved with prompt '#{prompt}'", :green)
     elsif @options[:prompt]
-      start_prompt(@options[:prompt])
+      start_conversation(@options[:prompt])
     end
   end
 
   private
 
-  def execute_command(command)
+  def execute_shell_command(command)
     stdout, stderr, status = Open3.capture3(command)
     [stdout, stderr, status.exitstatus]
   end
 
-  def start_prompt(prompt)
+  def exit_with_message(message, color)
+    if color
+      puts message.colorize(color)
+    else
+      puts message
+    end
+
+    exit
+  end
+
+  def start_conversation(prompt)
     message = @client.first_prompt(prompt)
 
     if message.downcase == '$$cannot_compute$$'
-      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
-      exit
+      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
     if message.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'.colorize(:magenta)
       output = "No information gathering was needed."
     elsif message.downcase == '$$cannot_compute$$'
-      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
-      exit
+      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     else
       puts 'Information gathering command:'.colorize(:magenta)
       puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
@@ -92,8 +99,7 @@ class GPTerm
     message = @client.final_prompt(output)
 
     if message.downcase == '$$cannot_compute$$'
-      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
-      exit
+      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
     puts 'Generated command to accomplish your goal:'.colorize(:magenta)
@@ -110,12 +116,11 @@ class GPTerm
     commands = message.split("\n")
 
     commands.each do |command|
-      stdout, stderr, exit_status = execute_command(command)
+      stdout, stderr, exit_status = execute_shell_command(command)
       if exit_status != 0
         puts "#{command} failed with the following output:".colorize(:red)
         puts "#{stderr.gsub(/^/, "  ")}".colorize(:red) if stderr.length > 0
-        puts "  Exit status: #{exit_status}".colorize(:red)
-        exit
+        exit_with_message("  Exit status: #{exit_status}", :red)
       end
       puts stdout if stdout.length > 0
       # I'm doing this here because git for some reason always returns the output of a push to stderr,
@@ -171,14 +176,12 @@ class GPTerm
           opts.banner = "gpterm config [--openapi_key <value>|--send_path <true|false>]"
           opts.on("--openapi_key VALUE", "Set the OpenAI API key") do |v|
             AppConfig.add_openapi_key(@config, v)
-            puts "OpenAI API key saved"
-            exit
+            exit_with_message("OpenAI API key saved")
           end
           opts.on("--send_path", "Send the PATH environment variable to OpenAI") do
             @config['send_path'] = true
             AppConfig.save_config(@config)
-            puts "Your PATH environment variable will be sent to OpenAI to help with command generation"
-            exit
+            exit_with_message("Your PATH environment variable will be sent to OpenAI to help with command generation")
           end
         end
       }
@@ -204,8 +207,7 @@ class GPTerm
       subcommands[command][:option_parser].parse!
       subcommands[command][:argument_parser].call(ARGV) if subcommands[command][:argument_parser]
     elsif command == 'help'
-      puts main
-      exit
+      exit_with_message(main)
     elsif command
       options[:prompt] = command
     else
