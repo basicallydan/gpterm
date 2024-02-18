@@ -2,12 +2,12 @@ require "openai"
 require 'yaml'
 
 class Client
-  attr_reader :openapi_client
+  attr_reader :openai_client
   attr_reader :config
 
   def initialize(config)
     @config = config
-    @openapi_client = OpenAI::Client.new(access_token: config["openapi_key"])
+    @openai_client = OpenAI::Client.new(access_token: config["openapi_key"])
     @prompts = YAML.load_file('config/prompts.yml')
   end
 
@@ -79,7 +79,7 @@ class Client
   def continue_conversation(prompt)
     @messages << { role: "user", content: prompt }
 
-    response = openapi_client.chat(
+    response = openai_client.chat(
       parameters: {
         model: "gpt-4-turbo-preview",
         messages: @messages,
