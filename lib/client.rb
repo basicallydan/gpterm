@@ -8,7 +8,7 @@ class Client
   def initialize(config)
     @config = config
     @openai_client = OpenAI::Client.new(access_token: config["openapi_key"])
-    @prompts = YAML.load_file('config/prompts.yml')
+    @prompts = YAML.load_file(File.join(__dir__, '..', 'config', 'prompts.yml'))
   end
 
   def first_prompt(user_goal_prompt)
