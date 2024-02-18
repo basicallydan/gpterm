@@ -1,3 +1,12 @@
+# 0.6.1
+
+- Updated prompts.yml to include guidelines on command execution and multiline strings restriction
+- Updated path to prompts.yml in client.rb to be more robust by using File.join
+- Updated exit_with_message method to support optional color parameter in gpterm.rb
+- Credit in readme
+- Preparing the changelog for a new version
+- Refactored client.rb to dynamically set the model based on configuration. Enhanced gpterm.rb to include user input for model preference and improved configuration setup process.
+
 # 0.6.0
 
 - Allow the model to be configured
