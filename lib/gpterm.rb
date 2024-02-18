@@ -37,7 +37,7 @@ class GPTerm
     [stdout, stderr, status.exitstatus]
   end
 
-  def exit_with_message(message, color)
+  def exit_with_message(message, color = nil)
     if color
       puts message.colorize(color)
     else
