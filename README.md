@@ -1,6 +1,8 @@
-# gpterm
+# gpterm: a natural language interface for your terminal
 
 **WARNING:** `gpterm` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.
+
+![gpterm-fb-for-dogs](https://github.com/basicallydan/gpterm/assets/516325/7a5bed4f-6f41-4d0a-85d9-79fb071c1aaf)
 
 `gpterm` is a powerful, flexible and dangerous command-line tool designed to help you generate commands for your terminal using OpenAI's Chat Completions. It will not execute commands without your consent, but please do check which commands it is presenting before you let it execute them. Like so:
 
