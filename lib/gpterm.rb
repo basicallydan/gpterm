@@ -82,7 +82,7 @@ class GPTerm
     else
       puts 'Information gathering command:'.colorize(:magenta)
       puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
-      puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
+      puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
       continue = get_yes_or_no
 
       unless continue.downcase == 'y'
@@ -125,7 +125,7 @@ class GPTerm
     puts 'Generated command to accomplish your goal:'.colorize(:magenta)
     puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
 
-    puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
+    puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
 
     continue = get_yes_or_no
 
@@ -156,11 +156,11 @@ class GPTerm
       new_config = {}
       puts "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
 
-      puts "Enter your OpenAI API key's \"SECRET KEY\" value: ".colorize(:yellow)
+      puts "Enter your OpenAI API key's \"SECRET KEY\" value then hit return: ".colorize(:yellow)
       new_config['openapi_key'] = STDIN.gets.chomp
 
       puts "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
-      puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '.colorize(:yellow)
+      puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n then hit return) '.colorize(:yellow)
 
       input = get_yes_or_no
 
