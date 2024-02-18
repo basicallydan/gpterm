@@ -2,7 +2,7 @@
 
 **WARNING:** `gpterm` has very few guardrails. If used indiscriminately, it can wipe your entire system or leak information.
 
-![gpterm-fb-for-dogs](https://github.com/basicallydan/gpterm/assets/516325/7a5bed4f-6f41-4d0a-85d9-79fb071c1aaf)
+![gpterm-fb-for-dogs-18-feb](https://github.com/basicallydan/gpterm/assets/516325/db45357d-2270-4253-b344-10523bea34e1)
 
 `gpterm` is a powerful, flexible and dangerous command-line tool designed to help you generate commands for your terminal using OpenAI's Chat Completions. It will not execute commands without your consent, but please do check which commands it is presenting before you let it execute them. Like so:
 
