@@ -21,6 +21,8 @@ class Client
 
       You have the ability to run any command that this system can run, and you can read the output of those commands.
 
+      However, any command which would ordinarily change the directory, such as cd, will not change the location of the directory in which you are running. To execute a command in a different directory, you must chain the cd command with the command you want to run, like so: `cd /path/to/directory && command`.
+
       The user is trying to accomplish a task using the terminal, but they are not sure how to do it.
     PROMPT
 
