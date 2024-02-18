@@ -1,5 +1,6 @@
 require 'optparse'
 require 'colorize'
+require 'open3'
 
 require_relative 'config'
 require_relative 'client'
@@ -25,6 +26,11 @@ class GPTerm
 
   private
 
+  def execute_command(command)
+    stdout, stderr, status = Open3.capture3(command)
+    [stdout, stderr, status.exitstatus]
+  end
+
   def start_prompt(prompt)
     message = @client.first_prompt(prompt)
 
@@ -49,8 +55,10 @@ class GPTerm
       puts 'Running command...'
       output = `#{message}`
 
-      puts 'Output:'
-      puts output
+      if @config[:verbose]
+        puts 'Output:'
+        puts output
+      end
     end
 
     output = offer_more_information(output)
@@ -84,10 +92,18 @@ class GPTerm
       exit
     end
 
-    output = `#{message}`
+    commands = message.split("\n")
 
-    puts 'Output:'
-    puts output
+    commands.each do |command|
+      stdout, stderr, exit_status = execute_command(command)
+      puts stdout.colorize(:green) if stdout.length > 0
+      if stderr.length > 0
+        puts "#{command} failed with the following error:".colorize(:red)
+        puts "#{stderr.gsub(/^/, "  ")}".colorize(:red)
+        puts "  Exit status: #{exit_status}".colorize(:red)
+        exit
+      end
+    end
   end
 
   def load_config
