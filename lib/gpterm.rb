@@ -49,6 +49,9 @@ class GPTerm
     if message.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'.colorize(:magenta)
       output = "No information gathering was needed."
+    elsif message.downcase == '$$cannot_compute$$'
+      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
+      exit
     else
       puts 'Information gathering command:'.colorize(:magenta)
       puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
@@ -68,7 +71,7 @@ class GPTerm
       end
     end
 
-    output = offer_more_information(output)
+    output = @client.offer_information_prompt(output, :shell_output_response)
 
     while output.downcase != '$$no_more_information_needed$$'
       puts "You have been asked to provide more information with this command:".colorize(:magenta)
@@ -80,13 +83,18 @@ class GPTerm
       if response.downcase == 'skip'
         output = '$$no_more_information_needed$$'
       else
-        output = offer_more_information(response)
+        output = @client.offer_information_prompt(response, :question_response)
       end
     end
 
     puts 'Requesting the next command...'.colorize(:magenta)
 
     message = @client.final_prompt(output)
+
+    if message.downcase == '$$cannot_compute$$'
+      puts 'Sorry, a command could not be generated for that prompt. Try another.'.colorize(:red)
+      exit
+    end
 
     puts 'Generated command to accomplish your goal:'.colorize(:magenta)
     puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
@@ -206,9 +214,5 @@ class GPTerm
     end
 
     options
-  end
-
-  def offer_more_information(output)
-    output = @client.offer_information_prompt(output)
   end
 end

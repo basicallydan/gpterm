@@ -1,4 +1,5 @@
 require "openai"
+require 'yaml'
 
 class Client
   attr_reader :openapi_client
@@ -7,76 +8,35 @@ class Client
   def initialize(config)
     @config = config
     @openapi_client = OpenAI::Client.new(access_token: config["openapi_key"])
+    @prompts = YAML.load_file('config/prompts.yml')
   end
 
-  def first_prompt(prompt)
-    system_prompt = <<~PROMPT
-      You are a command-line application being executed inside of a directory in a macOS environment, on the user's terminal command line.
-
-      You are executed by running `gpterm` in the terminal, and you are provided with a prompt to respond to with the -p flag.
-
-      Users can add a preset prompt by running `gpterm -s <name>,<prompt>`.
-
-      The eventual output to the user would be a list of commands that they can run in their terminal to accomplish a task.
-
-      You have the ability to run any command that this system can run, and you can read the output of those commands.
-
-      However, any command which would ordinarily change the directory, such as cd, will not change the location of the directory in which you are running. To execute a command in a different directory, you must chain the cd command with the command you want to run, like so: `cd /path/to/directory && command`. You will need to do the same for any command that requires a different working directory, even if you have used cd in a previous command.
-
-      The user is trying to accomplish a task using the terminal, but they are not sure how to do it.
-    PROMPT
+  def first_prompt(goal_prompt)
+    system_prompt = @prompts["system"]
 
     if @config["send_path"]
       system_prompt += <<~PROMPT
+        # ADDITIONAL CONTEXT:
+
         The user's PATH environment variable is:
         #{ENV["PATH"]}
       PROMPT
     end
 
-    full_prompt = <<~PROMPT
-      Your FIRST response should be a list of commands that will be automatically executed to gather more information about the user's system.
-      - The response MUST NOT contain any plain language instructions, and must not start with or end with backticks to indicate code.
-      - The commands MUST NOT make any changes to the user's system.
-      - The commands MUST NOT make any changes to any files on the user's system.
-      - The commands MUST NOT write to any files using the > or >> operators.
-      - The commands MUST NOT use the touch command.
-      - The commands MUST NOT use echo or any other command to write into files using the > or >> operators.
-      - The commands MUST NOT send any data to any external servers.
-      - The commands MUST NOT contain any placeholders in angle brackets like <this>.
-      - The commands MAY gather information about the user's system, such as the version of a software package, or the contents of a file.
-      - The commands CAN pipe their output into other commands.
-      - The commands SHOULD tend to gather more verbose information INSTEAD OF more concise information.
-      This will help you to provide a more accurate response to the user's goal.
-      Therefore your FIRST response MUST contain ONLY a list of commands and nothing else.
+    user_prompt = @prompts["info_gathering"]
+    user_prompt += <<~PROMPT
+      The user's GOAL PROMPT is:
 
-      VALID example response. These commands are examples of commands which CAN be included in your FIRST response:
+      "#{goal_prompt}"
 
-        for file in *; do cat "$file"; done
-        which ls
-        which git
-        which brew
-        git diff
-        git status
+      Please respond with one or more commands to execute to gather more information about the user's system before providing the response which will accomplish the user's goal.
 
-      INVALID example response. These commands are examples of commands which MUST NOT be included in your FIRST response:
-
-        touch file.txt
-        git add .
-        git push
-
-      If you cannot create a VALID response, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
-      If you do not need to gather more information, simply return the string "$$no_gathering_needed$$" and the next step will be executed.
-      You probably will need to gather information.
-      If you need to gather information directly from the user, you will be able to do so in the next step.
-
-      The user's goal prompt is:
-      "#{prompt}"
-      Commands to execute to gather more information about the user's system before providing the response which will accomplish the user's goal:
+      COMMANDS:
     PROMPT
 
     @messages = [
       { role: "system", content: system_prompt },
-      { role: "user", content: full_prompt }
+      { role: "user", content: user_prompt }
     ]
 
     response = openapi_client.chat(
@@ -93,20 +53,24 @@ class Client
     content
   end
 
-  def offer_information_prompt(prompt)
-    full_prompt = <<~PROMPT
-      This is the output of the command you provided to the user in the previous step.
+  def offer_information_prompt(previous_output, previous_output_type = :question_response)
+    question_prompt = if previous_output_type == :question_response
+      <<~PROMPT
+        This is the output of the question you asked the user in the previous step.
 
-      #{prompt}
+        #{previous_output}
+      PROMPT
+    else
+      <<~PROMPT
+        This is the output of the command you provided to the user in the previous step.
 
-      Before you provide the user with the next command, you have the opportunity to ask the user to provide more information so you can better tailor your response to their needs.
+        #{previous_output}
+      PROMPT
+    end
 
-      If you would like to ask the user for more information, please provide a prompt that asks the user for the information you need.
-      - Your prompt MUST ONLY contain one question. You will be able to ask another question in the next step.
-      If you have all the information you need, simply return the string "$$no_more_information_needed$$" and the next step will be executed.
-    PROMPT
+    question_prompt += @prompts["user_question"]
 
-    @messages << { role: "user", content: full_prompt }
+    @messages << { role: "user", content: question_prompt }
 
     response = openapi_client.chat(
       parameters: {
@@ -129,25 +93,9 @@ class Client
 
       #{prompt}
 
-      Your NEXT response should be a list of commands that will be automatically executed to fulfill the user's goal.
-      - The commands may make changes to the user's system.
-      - The commands may install new software using package managers like Homebrew
-      - The commands MUST all start with a valid command that you would run in the terminal
-      - The commands MUST NOT contain any placeholders in angle brackets like <this>.
-      - The response MUST NOT contain any plain language instructions, or backticks indicating where the commands begin or end.
-      - THe response MUST NOT start or end with backticks.
-      - The response MUST NOT end with a newline character.
-      Therefore your NEXT response MUST contain ONLY a list of commands and nothing else.
-
-      VALID example response. These commands are examples of commands which CAN be included in your FINAL response:
-
-        ls
-        mkdir new_directory
-        brew install git
-        git commit -m "This is a great commit message"
-
-      If you cannot keep to this restriction, simply return the string "$$cannot_compute$$" and the user will be asked to provide a new prompt.
     PROMPT
+
+    full_prompt += @prompts["goal_commands"]
 
     @messages << { role: "user", content: full_prompt }
 
