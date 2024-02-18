@@ -157,7 +157,7 @@ class GPTerm
       puts "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
 
       puts "Enter your OpenAI API key's \"SECRET KEY\" value then hit return: ".colorize(:yellow)
-      new_config['openapi_key'] = STDIN.gets.chomp
+      new_config['openapi_key'] = get_non_empty_input
 
       puts "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
       puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n then hit return) '.colorize(:yellow)
@@ -170,7 +170,14 @@ class GPTerm
         new_config['send_path'] = false
       end
 
+      default_model = 'gpt-4-turbo-preview'
+
+      puts "The default model is #{default_model}. If you would like to change it please enter the name of your preferred model:".colorize(:yellow)
+      new_config['model'] = STDIN.gets.chomp.strip || default_model
+
       AppConfig.save_config(new_config)
+
+      puts "Configuration saved to #{AppConfig::CONFIG_FILE}".colorize(:green)
 
       new_config
     else

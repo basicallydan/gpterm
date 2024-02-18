@@ -81,7 +81,7 @@ class Client
 
     response = openai_client.chat(
       parameters: {
-        model: "gpt-4-turbo-preview",
+        model: @config["model"] || "gpt-4-turbo-preview",
         messages: @messages,
         temperature: 0.6,
       }
