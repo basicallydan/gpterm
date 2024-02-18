@@ -96,13 +96,13 @@ class GPTerm
 
     commands.each do |command|
       stdout, stderr, exit_status = execute_command(command)
-      puts stdout.colorize(:green) if stdout.length > 0
-      if stderr.length > 0
-        puts "#{command} failed with the following error:".colorize(:red)
-        puts "#{stderr.gsub(/^/, "  ")}".colorize(:red)
+      if exit_status != 0
+        puts "#{command} failed with the following output:".colorize(:red)
         puts "  Exit status: #{exit_status}".colorize(:red)
         exit
       end
+      puts stdout.colorize(:green) if stdout.length > 0
+      puts "#{stderr.gsub(/^/, "  ")}".colorize(:red) if stderr.length > 0
     end
   end
 
