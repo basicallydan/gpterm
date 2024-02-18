@@ -47,6 +47,26 @@ class GPTerm
     exit
   end
 
+  # Ensures the user enters "y" or "n"
+  def get_yes_or_no
+    input = STDIN.gets.chomp.downcase
+    while ['y', 'n'].include?(input) == false
+      puts 'Please enter "y/Y" or "n/N":'.colorize(:yellow)
+      input = STDIN.gets.chomp.downcase
+    end
+    input
+  end
+
+  # Ensures the user enters a non-empty value
+  def get_non_empty_input
+    input = STDIN.gets.chomp.strip
+    while input.length == 0
+      puts 'Please enter a non-empty value:'.colorize(:yellow)
+      input = STDIN.gets.chomp.strip
+    end
+    input
+  end
+
   def start_conversation(prompt)
     message = @client.first_prompt(prompt)
 
@@ -63,7 +83,7 @@ class GPTerm
       puts 'Information gathering command:'.colorize(:magenta)
       puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
       puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
-      continue = STDIN.gets.chomp
+      continue = get_yes_or_no
 
       unless continue.downcase == 'y'
         exit
@@ -85,7 +105,7 @@ class GPTerm
       puts output.gsub(/^/, "#{"  >".colorize(:blue)} ")
       puts "What is your response? (Type 'skip' to skip this step and force the final command to be generated)".colorize(:yellow)
 
-      response = STDIN.gets.chomp
+      response = get_non_empty_input
 
       if response.downcase == 'skip'
         output = '$$no_more_information_needed$$'
@@ -107,7 +127,7 @@ class GPTerm
 
     puts 'Do you want to execute this command? (Y/n)'.colorize(:yellow)
 
-    continue = STDIN.gets.chomp
+    continue = get_yes_or_no
 
     unless continue.downcase == 'y'
       exit
@@ -142,7 +162,9 @@ class GPTerm
       puts "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
       puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n) '.colorize(:yellow)
 
-      if STDIN.gets.chomp.downcase == 'y'
+      input = get_yes_or_no
+
+      if input == 'y'
         new_config['send_path'] = true
       else
         new_config['send_path'] = false
@@ -212,7 +234,7 @@ class GPTerm
       options[:prompt] = command
     else
       puts 'Enter a prompt to generate text from:'.colorize(:yellow)
-      options[:prompt] = STDIN.gets.chomp
+      options[:prompt] = get_non_empty_input
     end
 
     options
