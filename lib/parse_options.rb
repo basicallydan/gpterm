@@ -57,7 +57,7 @@ class ParseOptions
       options[:prompt] = command
     else
       puts 'Enter a prompt to generate text from:'.colorize(:yellow)
-      options[:prompt] = get_non_empty_input
+      options[:prompt] = Input.non_empty
     end
 
     options

@@ -1,9 +1,10 @@
 require 'colorize'
 require 'open3'
 
-require_relative 'config'
+require_relative 'app_config'
 require_relative 'client'
 require_relative 'parse_options'
+require_relative 'input'
 
 # The colours work like this:
 # - Output from STDOUT or STDERR is default
@@ -14,7 +15,7 @@ require_relative 'parse_options'
 
 class GPTerm
   def initialize
-    @config = load_config
+    @config = AppConfig.load
     @options = ParseOptions.call(@config)
     @client = Client.new(@config)
   end
@@ -47,26 +48,6 @@ class GPTerm
     exit
   end
 
-  # Ensures the user enters "y" or "n"
-  def get_yes_or_no
-    input = STDIN.gets.chomp.downcase
-    while ['y', 'n'].include?(input) == false
-      puts 'Please enter "y/Y" or "n/N":'.colorize(:yellow)
-      input = STDIN.gets.chomp.downcase
-    end
-    input
-  end
-
-  # Ensures the user enters a non-empty value
-  def get_non_empty_input
-    input = STDIN.gets.chomp.strip
-    while input.length == 0
-      puts 'Please enter a non-empty value:'.colorize(:yellow)
-      input = STDIN.gets.chomp.strip
-    end
-    input
-  end
-
   def start_conversation(prompt)
     info_prompt_response = @client.first_prompt(prompt)
 
@@ -81,7 +62,7 @@ class GPTerm
       puts 'Information gathering command:'.colorize(:magenta)
       puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
       puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
-      continue = get_yes_or_no
+      continue = Input.yes_or_no
 
       unless continue.downcase == 'y'
         exit
@@ -103,7 +84,7 @@ class GPTerm
       puts offer_prompt_response.gsub(/^/, "#{"  >".colorize(:blue)} ")
       puts "What is your response? (Type 'skip' to skip this step and force the final command to be generated)".colorize(:yellow)
 
-      user_question_response = get_non_empty_input
+      user_question_response = Input.non_empty
 
       if user_question_response.downcase == 'skip'
         offer_prompt_response = '$$no_more_information_needed$$'
@@ -125,7 +106,7 @@ class GPTerm
 
     puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
 
-    continue = get_yes_or_no
+    continue = Input.yes_or_no
 
     unless continue.downcase == 'y'
       exit
@@ -144,42 +125,6 @@ class GPTerm
       # I'm doing this here because git for some reason always returns the output of a push to stderr,
       # even if it's successful. I don't want to show the output of a successful push as an error.
       puts stderr if stderr.length > 0
-    end
-  end
-
-  def load_config
-    unless File.exist?(AppConfig::CONFIG_FILE)
-      puts 'Welcome to gpterm! It looks like this is your first time using this application.'.colorize(:magenta)
-
-      new_config = {}
-      puts "Before we get started, we need to configure the application. All the info you provide will be saved in #{AppConfig::CONFIG_FILE}.".colorize(:magenta)
-
-      puts "Enter your OpenAI API key's \"SECRET KEY\" value then hit return: ".colorize(:yellow)
-      new_config['openapi_key'] = get_non_empty_input
-
-      puts "Your PATH environment variable is: #{ENV['PATH']}".colorize(:magenta)
-      puts 'Are you happy for your PATH to be sent to OpenAI to help with command generation? (Y/n then hit return) '.colorize(:yellow)
-
-      input = get_yes_or_no
-
-      if input == 'y'
-        new_config['send_path'] = true
-      else
-        new_config['send_path'] = false
-      end
-
-      default_model = 'gpt-4-turbo-preview'
-
-      puts "The default model is #{default_model}. If you would like to change it please enter the name of your preferred model:".colorize(:yellow)
-      new_config['model'] = STDIN.gets.chomp.strip || default_model
-
-      AppConfig.save_config(new_config)
-
-      puts "Configuration saved to #{AppConfig::CONFIG_FILE}".colorize(:green)
-
-      new_config
-    else
-      AppConfig.load_config
     end
   end
 end
