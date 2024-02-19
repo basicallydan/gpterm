@@ -79,9 +79,16 @@ class Client
   def continue_conversation(prompt)
     @messages << { role: "user", content: prompt }
 
+    model = @config["model"]
+
+    if !model || model.length > 0
+      model = "gpt-4-turbo-preview"
+    end
+
+
     response = openai_client.chat(
       parameters: {
-        model: @config["model"] || "gpt-4-turbo-preview",
+        model: model,
         messages: @messages,
         temperature: 0.6,
       }
