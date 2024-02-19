@@ -1,5 +1,6 @@
 require 'colorize'
 require 'open3'
+require "openai"
 
 require_relative 'app_config'
 require_relative 'command_generator'
@@ -17,7 +18,8 @@ class GPTerm
   def initialize
     @config = AppConfig.load
     @options = ParseOptions.call(@config)
-    @command_generator = CommandGenerator.new(@config)
+    @openai_client = OpenAI::Client.new(access_token: @config["openapi_key"])
+    @command_generator = CommandGenerator.new(@config, @openai_client)
   end
 
   def run

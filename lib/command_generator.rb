@@ -1,13 +1,12 @@
-require "openai"
 require 'yaml'
 
 class CommandGenerator
   attr_reader :openai_client
   attr_reader :config
 
-  def initialize(config)
+  def initialize(config, openai_client)
     @config = config
-    @openai_client = OpenAI::Client.new(access_token: config["openapi_key"])
+    @openai_client = openai_client
     @prompts = YAML.load_file(File.join(__dir__, '..', 'config', 'prompts.yml'))
   end
 
