@@ -76,10 +76,6 @@ class GPTerm
     # the user answering a question
     goal_prompt_response = @command_generator.final_prompt(offer_prompt_response)
 
-    if goal_prompt_response.downcase == '$$cannot_compute$$'
-      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
-    end
-
     goal_prompt_response = run_refinement_loop(goal_prompt_response)
 
     commands = goal_prompt_response.split("\n")
@@ -101,10 +97,6 @@ class GPTerm
   def gather_information_from_shell(prompt)
     info_prompt_response = @command_generator.first_prompt(prompt)
 
-    if info_prompt_response.downcase == '$$cannot_compute$$'
-      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
-    end
-
     if info_prompt_response.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'.colorize(:magenta) if @config[:verbose]
       shell_output = nil
@@ -124,6 +116,10 @@ class GPTerm
   end
 
   def run_refinement_loop(original_response, purpose = 'accomplish your goal')
+    if original_response.downcase == '$$cannot_compute$$'
+      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+    end
+
     refined_response = original_response.dup
 
     puts "The following command(s) were generated to #{purpose}:".colorize(:magenta)
