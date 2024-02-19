@@ -116,3 +116,5 @@ goal_commands: |
   - $$cannot_compute$$ - You cannot create a VALID response to this prompt. The user will be asked to provide a new prompt.
 
   COMMANDS:
+refine_commands: |
+  The last response needs some changes. Please take into account this prompt from the user, then refine the commands you provided in the last response.

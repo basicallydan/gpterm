@@ -51,33 +51,7 @@ class GPTerm
   end
 
   def start_conversation(prompt)
-    info_prompt_response = @command_generator.first_prompt(prompt)
-
-    if info_prompt_response.downcase == '$$cannot_compute$$'
-      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
-    end
-
-    if info_prompt_response.downcase == '$$no_gathering_needed$$'
-      puts 'No information gathering needed'.colorize(:magenta) if @config[:verbose]
-      shell_output = nil
-    else
-      puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
-      puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
-      puts 'Do you want to execute this/these command(s)? (Y/n then hit return)'.colorize(:yellow)
-      continue = Input.yes_or_no
-
-      unless continue.downcase == 'y'
-        exit
-      end
-
-      puts 'Running command...'
-      shell_output = `#{info_prompt_response}`
-
-      if @config[:verbose]
-        puts 'Shell output:'
-        puts shell_output
-      end
-    end
+    shell_output = gather_information_from_shell(prompt)
 
     offer_prompt_response = @command_generator.offer_information_prompt(shell_output, :shell_output_response)
 
@@ -98,6 +72,8 @@ class GPTerm
 
     puts 'Requesting the next command...'.colorize(:magenta) if @config[:verbose]
 
+    # TODO: Some redundant info being passed here in the case of
+    # the user answering a question
     goal_prompt_response = @command_generator.final_prompt(offer_prompt_response)
 
     if goal_prompt_response.downcase == '$$cannot_compute$$'
@@ -107,9 +83,23 @@ class GPTerm
     puts 'The following command(s) were generated to accomplish your goal:'.colorize(:magenta)
     puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:green)} ")
 
-    puts 'Do you want to execute this/these command(s)? (Y/n then hit return)'.colorize(:yellow)
+    puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+    continue = Input.yes_no_or_refine
 
-    continue = Input.yes_or_no
+    while continue.downcase == 'r'
+      puts 'Please enter a new prompt:'.colorize(:yellow)
+      new_prompt = Input.non_empty
+      goal_prompt_response = @command_generator.refine_last_response(new_prompt)
+
+      if goal_prompt_response.downcase == '$$cannot_compute$$'
+        exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+      end
+
+      puts 'The following command(s) were generated to accomplish your goal:'.colorize(:magenta)
+      puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
+      puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+      continue = Input.yes_no_or_refine
+    end
 
     unless continue.downcase == 'y'
       exit
@@ -129,5 +119,52 @@ class GPTerm
       # even if it's successful. I don't want to show the output of a successful push as an error.
       puts stderr if stderr.length > 0
     end
+  end
+
+  def gather_information_from_shell(prompt)
+    info_prompt_response = @command_generator.first_prompt(prompt)
+
+    if info_prompt_response.downcase == '$$cannot_compute$$'
+      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+    end
+
+    if info_prompt_response.downcase == '$$no_gathering_needed$$'
+      puts 'No information gathering needed'.colorize(:magenta) if @config[:verbose]
+      shell_output = nil
+    else
+      puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
+      puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
+      puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+      continue = Input.yes_no_or_refine
+
+      while continue.downcase == 'r'
+        puts 'Please enter a new prompt:'.colorize(:yellow)
+        new_prompt = Input.non_empty
+        info_prompt_response = @command_generator.refine_last_response(new_prompt)
+
+        if info_prompt_response.downcase == '$$cannot_compute$$'
+          exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+        end
+
+        puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
+        puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
+        puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+        continue = Input.yes_no_or_refine
+      end
+
+      unless continue.downcase == 'y'
+        exit
+      end
+
+      puts 'Running command...'
+      shell_output = `#{info_prompt_response}`
+
+      if @config[:verbose]
+        puts 'Shell output:'
+        puts shell_output
+      end
+
+    end
+    shell_output
   end
 end

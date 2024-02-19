@@ -73,6 +73,19 @@ class CommandGenerator
     continue_conversation(goal_commands_prompt)
   end
 
+  def refine_last_response(prompt)
+    refinement_prompt = @prompts["refine_commands"]
+
+    refinement_prompt += <<~PROMPT
+
+      #{prompt}
+
+      COMMANDS:
+    PROMPT
+
+    continue_conversation(refinement_prompt)
+  end
+
   private
 
   def continue_conversation(prompt)

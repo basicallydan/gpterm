@@ -18,4 +18,14 @@ module Input
     end
     input
   end
+
+  # Ensures the user enters "y" or "n"
+  def self.yes_no_or_refine
+    input = STDIN.gets.chomp.downcase
+    while ['y', 'n', 'r'].include?(input) == false
+      puts 'Please enter "y/Y", "n/N" or "r/R":'.colorize(:yellow)
+      input = STDIN.gets.chomp.downcase
+    end
+    input
+  end
 end
