@@ -1,9 +1,9 @@
-require 'optparse'
 require 'colorize'
 require 'open3'
 
 require_relative 'config'
 require_relative 'client'
+require_relative 'parse_options'
 
 # The colours work like this:
 # - Output from STDOUT or STDERR is default
@@ -15,7 +15,7 @@ require_relative 'client'
 class GPTerm
   def initialize
     @config = load_config
-    @options = parse_options
+    @options = ParseOptions.call(@config)
     @client = Client.new(@config)
   end
 
@@ -68,20 +68,18 @@ class GPTerm
   end
 
   def start_conversation(prompt)
-    message = @client.first_prompt(prompt)
+    info_prompt_response = @client.first_prompt(prompt)
 
-    if message.downcase == '$$cannot_compute$$'
+    if info_prompt_response.downcase == '$$cannot_compute$$'
       exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
-    if message.downcase == '$$no_gathering_needed$$'
+    if info_prompt_response.downcase == '$$no_gathering_needed$$'
       puts 'No information gathering needed'.colorize(:magenta)
-      output = "No information gathering was needed."
-    elsif message.downcase == '$$cannot_compute$$'
-      exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+      shell_output = nil
     else
       puts 'Information gathering command:'.colorize(:magenta)
-      puts message.gsub(/^/, "#{"  $".colorize(:blue)} ")
+      puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
       puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
       continue = get_yes_or_no
 
@@ -90,40 +88,40 @@ class GPTerm
       end
 
       puts 'Running command...'
-      output = `#{message}`
+      shell_output = `#{info_prompt_response}`
 
       if @config[:verbose]
-        puts 'Output:'
-        puts output
+        puts 'Shell output:'
+        puts shell_output
       end
     end
 
-    output = @client.offer_information_prompt(output, :shell_output_response)
+    offer_prompt_response = @client.offer_information_prompt(shell_output, :shell_output_response)
 
-    while output.downcase != '$$no_more_information_needed$$'
+    while offer_prompt_response.downcase != '$$no_more_information_needed$$'
       puts "You have been asked to provide more information with this command:".colorize(:magenta)
-      puts output.gsub(/^/, "#{"  >".colorize(:blue)} ")
+      puts offer_prompt_response.gsub(/^/, "#{"  >".colorize(:blue)} ")
       puts "What is your response? (Type 'skip' to skip this step and force the final command to be generated)".colorize(:yellow)
 
-      response = get_non_empty_input
+      user_question_response = get_non_empty_input
 
-      if response.downcase == 'skip'
-        output = '$$no_more_information_needed$$'
+      if user_question_response.downcase == 'skip'
+        offer_prompt_response = '$$no_more_information_needed$$'
       else
-        output = @client.offer_information_prompt(response, :question_response)
+        offer_prompt_response = @client.offer_information_prompt(user_question_response, :question_response)
       end
     end
 
     puts 'Requesting the next command...'.colorize(:magenta)
 
-    message = @client.final_prompt(output)
+    goal_prompt_response = @client.final_prompt(offer_prompt_response)
 
-    if message.downcase == '$$cannot_compute$$'
+    if goal_prompt_response.downcase == '$$cannot_compute$$'
       exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
     puts 'Generated command to accomplish your goal:'.colorize(:magenta)
-    puts message.gsub(/^/, "#{"  $".colorize(:green)} ")
+    puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:green)} ")
 
     puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
 
@@ -133,7 +131,7 @@ class GPTerm
       exit
     end
 
-    commands = message.split("\n")
+    commands = goal_prompt_response.split("\n")
 
     commands.each do |command|
       stdout, stderr, exit_status = execute_shell_command(command)
@@ -183,67 +181,5 @@ class GPTerm
     else
       AppConfig.load_config
     end
-  end
-
-  def parse_options
-    options = {}
-    subcommands = {
-      'preset' => {
-        option_parser: OptionParser.new do |opts|
-          opts.banner = "gpterm preset <name> <prompt>"
-        end,
-        argument_parser: ->(args) {
-          if args.length < 2
-            options[:prompt] = @config['presets'][args[0]]
-          else
-            options[:preset_prompt] = [args[0], args[1]]
-          end
-        }
-      },
-      'config' => {
-        option_parser: OptionParser.new do |opts|
-          opts.banner = "gpterm config [--openapi_key <value>|--send_path <true|false>]"
-          opts.on("--openapi_key VALUE", "Set the OpenAI API key") do |v|
-            AppConfig.add_openapi_key(@config, v)
-            exit_with_message("OpenAI API key saved")
-          end
-          opts.on("--send_path", "Send the PATH environment variable to OpenAI") do
-            @config['send_path'] = true
-            AppConfig.save_config(@config)
-            exit_with_message("Your PATH environment variable will be sent to OpenAI to help with command generation")
-          end
-        end
-      }
-    }
-
-    main = OptionParser.new do |opts|
-      opts.banner = "Usage:"
-      opts.banner += "\n\ngpterm <prompt> [options] [subcommand [options]]"
-      opts.banner += "\n\nSubcommands:"
-      subcommands.each do |name, subcommand|
-        opts.banner += "\n  #{name} - #{subcommand[:option_parser].banner}"
-      end
-      opts.banner += "\n\nOptions:"
-      opts.on("-v", "--verbose", "Run verbosely") do |v|
-        options[:verbose] = true
-      end
-    end
-
-    command = ARGV.shift
-
-    main.order!
-    if subcommands.key?(command)
-      subcommands[command][:option_parser].parse!
-      subcommands[command][:argument_parser].call(ARGV) if subcommands[command][:argument_parser]
-    elsif command == 'help'
-      exit_with_message(main)
-    elsif command
-      options[:prompt] = command
-    else
-      puts 'Enter a prompt to generate text from:'.colorize(:yellow)
-      options[:prompt] = get_non_empty_input
-    end
-
-    options
   end
 end

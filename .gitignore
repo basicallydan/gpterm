@@ -5,3 +5,4 @@
 /gpterm.gemspec
 /.git
 /Gemfile.lock
+.DS_Store
