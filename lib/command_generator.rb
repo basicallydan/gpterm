@@ -1,7 +1,7 @@
 require "openai"
 require 'yaml'
 
-class Client
+class CommandGenerator
   attr_reader :openai_client
   attr_reader :config
 

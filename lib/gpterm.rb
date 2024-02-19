@@ -2,7 +2,7 @@ require 'colorize'
 require 'open3'
 
 require_relative 'app_config'
-require_relative 'client'
+require_relative 'command_generator'
 require_relative 'parse_options'
 require_relative 'input'
 
@@ -17,7 +17,7 @@ class GPTerm
   def initialize
     @config = AppConfig.load
     @options = ParseOptions.call(@config)
-    @client = Client.new(@config)
+    @command_generator = CommandGenerator.new(@config)
   end
 
   def run
@@ -49,19 +49,19 @@ class GPTerm
   end
 
   def start_conversation(prompt)
-    info_prompt_response = @client.first_prompt(prompt)
+    info_prompt_response = @command_generator.first_prompt(prompt)
 
     if info_prompt_response.downcase == '$$cannot_compute$$'
       exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
     if info_prompt_response.downcase == '$$no_gathering_needed$$'
-      puts 'No information gathering needed'.colorize(:magenta)
+      puts 'No information gathering needed'.colorize(:magenta) if @config[:verbose]
       shell_output = nil
     else
-      puts 'Information gathering command:'.colorize(:magenta)
+      puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
       puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
-      puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
+      puts 'Do you want to execute this/these command(s)? (Y/n then hit return)'.colorize(:yellow)
       continue = Input.yes_or_no
 
       unless continue.downcase == 'y'
@@ -77,7 +77,7 @@ class GPTerm
       end
     end
 
-    offer_prompt_response = @client.offer_information_prompt(shell_output, :shell_output_response)
+    offer_prompt_response = @command_generator.offer_information_prompt(shell_output, :shell_output_response)
 
     while offer_prompt_response.downcase != '$$no_more_information_needed$$'
       puts "You have been asked to provide more information with this command:".colorize(:magenta)
@@ -88,23 +88,24 @@ class GPTerm
 
       if user_question_response.downcase == 'skip'
         offer_prompt_response = '$$no_more_information_needed$$'
+        puts 'Thanks, one moment please...'.colorize(:magenta)
       else
-        offer_prompt_response = @client.offer_information_prompt(user_question_response, :question_response)
+        offer_prompt_response = @command_generator.offer_information_prompt(user_question_response, :question_response)
       end
     end
 
-    puts 'Requesting the next command...'.colorize(:magenta)
+    puts 'Requesting the next command...'.colorize(:magenta) if @config[:verbose]
 
-    goal_prompt_response = @client.final_prompt(offer_prompt_response)
+    goal_prompt_response = @command_generator.final_prompt(offer_prompt_response)
 
     if goal_prompt_response.downcase == '$$cannot_compute$$'
       exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
-    puts 'Generated command to accomplish your goal:'.colorize(:magenta)
+    puts 'The following command(s) were generated to accomplish your goal:'.colorize(:magenta)
     puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:green)} ")
 
-    puts 'Do you want to execute this command? (Y/n then hit return)'.colorize(:yellow)
+    puts 'Do you want to execute this/these command(s)? (Y/n then hit return)'.colorize(:yellow)
 
     continue = Input.yes_or_no
 
