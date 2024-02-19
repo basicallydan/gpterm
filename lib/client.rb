@@ -81,10 +81,9 @@ class Client
 
     model = @config["model"]
 
-    if !model || model.length > 0
+    if !model || model.strip.length == 0
       model = "gpt-4-turbo-preview"
     end
-
 
     response = openai_client.chat(
       parameters: {
