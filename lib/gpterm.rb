@@ -80,30 +80,7 @@ class GPTerm
       exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
     end
 
-    puts 'The following command(s) were generated to accomplish your goal:'.colorize(:magenta)
-    puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:green)} ")
-
-    puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
-    continue = Input.yes_no_or_refine
-
-    while continue.downcase == 'r'
-      puts 'Please enter a new prompt:'.colorize(:yellow)
-      new_prompt = Input.non_empty
-      goal_prompt_response = @command_generator.refine_last_response(new_prompt)
-
-      if goal_prompt_response.downcase == '$$cannot_compute$$'
-        exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
-      end
-
-      puts 'The following command(s) were generated to accomplish your goal:'.colorize(:magenta)
-      puts goal_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
-      puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
-      continue = Input.yes_no_or_refine
-    end
-
-    unless continue.downcase == 'y'
-      exit
-    end
+    goal_prompt_response = run_refinement_loop(goal_prompt_response)
 
     commands = goal_prompt_response.split("\n")
 
@@ -132,31 +109,9 @@ class GPTerm
       puts 'No information gathering needed'.colorize(:magenta) if @config[:verbose]
       shell_output = nil
     else
-      puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
-      puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
-      puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
-      continue = Input.yes_no_or_refine
+      info_prompt_response = run_refinement_loop(info_prompt_response, 'gather more information for your request')
 
-      while continue.downcase == 'r'
-        puts 'Please enter a new prompt:'.colorize(:yellow)
-        new_prompt = Input.non_empty
-        info_prompt_response = @command_generator.refine_last_response(new_prompt)
-
-        if info_prompt_response.downcase == '$$cannot_compute$$'
-          exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
-        end
-
-        puts 'The following command(s) are intended to gather more info for your request:'.colorize(:magenta)
-        puts info_prompt_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
-        puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
-        continue = Input.yes_no_or_refine
-      end
-
-      unless continue.downcase == 'y'
-        exit
-      end
-
-      puts 'Running command...'
+      puts 'Running command...' if @config[:verbose]
       shell_output = `#{info_prompt_response}`
 
       if @config[:verbose]
@@ -166,5 +121,35 @@ class GPTerm
 
     end
     shell_output
+  end
+
+  def run_refinement_loop(original_response, purpose = 'accomplish your goal')
+    refined_response = original_response.dup
+
+    puts "The following command(s) were generated to #{purpose}:".colorize(:magenta)
+    puts refined_response.gsub(/^/, "#{"  $".colorize(:green)} ")
+    puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+    continue = Input.yes_no_or_refine
+
+    while continue.downcase == 'r'
+      puts 'Please enter a new prompt:'.colorize(:yellow)
+      new_prompt = Input.non_empty
+      refined_response = @command_generator.refine_last_response(new_prompt)
+
+      if refined_response.downcase == '$$cannot_compute$$'
+        exit_with_message('Sorry, a command could not be generated for that prompt. Try another.', :red)
+      end
+
+      puts "The following command(s) were generated to #{purpose}:".colorize(:magenta)
+      puts refined_response.gsub(/^/, "#{"  $".colorize(:blue)} ")
+      puts 'Do you want to execute this/these command(s), or refine them with another prompt? (Y/n/r then hit return)'.colorize(:yellow)
+      continue = Input.yes_no_or_refine
+    end
+
+    unless continue.downcase == 'y'
+      exit
+    end
+
+    refined_response
   end
 end
